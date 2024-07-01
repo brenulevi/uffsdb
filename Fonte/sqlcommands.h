@@ -140,30 +140,3 @@ int verifyFieldName(char **, int );
 ////
 int verifyFK(char *, char *);
 
-/*
-  Retorna: void,
-  recebe: void,
-  Printa o commando begin da transação.
-*/
-void begin_transaction();
-
-/*
-  Retorna: void,
-  recebe: void,
-  Printa o commando end da trasnação.
-*/
-void end_transaction();
-
-/*
-  Retorna: void,
-  recebe: void,
-  Printa o commando commit da transação.
-*/
-void commit_transaction();
-
-/*
-  Retorna: void,
-  recebe: void,
-  Printa o commando rollback da transação.
-*/
-void rollback_transaction();

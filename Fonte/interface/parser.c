@@ -249,6 +249,7 @@ void clearGlobalStructs() {
     GLOBAL_PARSER.col_count         = 0;
     GLOBAL_PARSER.val_count         = 0;
     GLOBAL_PARSER.step              = 0;
+    GLOBAL_PARSER.ongoing_t         = 0;
 }
 
 void setMode(char mode) {
@@ -368,4 +369,56 @@ void yyerror(char *s, ...) {
   vfprintf(stderr, s, ap);
   fprintf(stderr, "\n");
   */
+}
+
+//GERENCIAMENTO DE TRANSAÇÕES
+
+void begin_transaction(){
+
+  printf("TRANSAÇÃO INICIADA!\n");
+  GLOBAL_PARSER.ongoing_t = 1;
+  GLOBAL_PARSER.consoleFlag = 1;
+
+}
+
+void end_transaction(){
+
+    if(GLOBAL_PARSER.ongoing_t){
+        commit_transaction(1);
+        GLOBAL_PARSER.ongoing_t = 0;
+        printf("TRANSAÇÃO FINALIZADA!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }else{
+        printf("Nenhuma transação em andamento!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }
+}
+
+void commit_transaction(int isEnd){
+
+    if(GLOBAL_PARSER.ongoing_t){
+        //Comitar transação
+        if(!isEnd){
+            printf("TRANSAÇÃO COMMITADA!\n");
+            GLOBAL_PARSER.consoleFlag = 1;
+        }
+    }else{
+        printf("Nenhuma transação em andamento!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }
+
+}
+
+void rollback_transaction(){
+
+    if(GLOBAL_PARSER.ongoing_t){
+        //Rollback transação
+        GLOBAL_PARSER.ongoing_t = 0;
+        printf("TRANSAÇÃO CANCELDA!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }else{
+        printf("Nenhuma transação em andamento!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }
+
 }

@@ -55,7 +55,7 @@ int yywrap() {
 start: insert | select | create_table | create_database | drop_table | drop_database
      | table_attr | list_tables | connection | exit_program | semicolon {GLOBAL_PARSER.consoleFlag = 1; return 0;}
      | help_pls | list_databases | clear | contributors | create_index
-     | qualquer_coisa | /*epsilon*/ | begin_transaction;
+     | qualquer_coisa | /*epsilon*/ | transaction;
 
 /*--------------------------------------------------*/
 /**************** GENERAL FUNCTIONS *****************/
@@ -223,18 +223,10 @@ atributo: OBJECT {setColumnBtreeCreate(yytext);}
 
 
 /* GERENCIAMENTO DE TRANSAÇÕES*/
-begin_transaction: TBEGIN {begin_transaction();} transaction_commands transaction_actions;
-
-transaction_commands: /* epsilon */
-                    | select
-                    | create_table
-                    | qualquer_coisa
-                    | list_tables
-                    | clear
-
-transaction_actions: END {end_transaction();}
-                  | ROLLBACK {rollback_transaction();}   
-                  | COMMIT {commit_transaction();} transaction_commands transaction_actions;
+transaction: TBEGIN {begin_transaction(); return 0;}
+            | END {end_transaction(); return 0;}
+            | ROLLBACK {rollback_transaction(); return 0;}   
+            | COMMIT {commit_transaction(0); return 0;}
 
 
 

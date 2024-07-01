@@ -126,3 +126,31 @@ void clearGlobalStructs();
  * dos tokens iniciais.
  */
 void setMode(char mode);
+
+/*
+  Retorna: void,
+  recebe: void,
+  Printa o comando begin da transação.
+*/
+void begin_transaction();
+
+/*
+  Retorna: void,
+  recebe: void,
+  Printa o comando end da trasnação.
+*/
+void end_transaction();
+
+/*
+  Retorna: void,
+  recebe: void,
+  Printa o comando commit da transação.
+*/
+void commit_transaction();
+
+/*
+  Retorna: void
+  recebe: void,
+  Printa o comando rollback da transação.
+*/
+void rollback_transaction();
