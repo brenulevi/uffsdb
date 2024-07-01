@@ -1205,3 +1205,28 @@ void createIndex(rc_insert *t) {
 }
 
 ///////
+
+
+void begin_transaction(){
+
+  printf("TRANSAÇÃO INICIADA!\n");
+
+}
+
+void end_transaction(){
+
+  printf("TRANSAÇÃO FINALIZADA!\n");
+
+}
+
+void commit_transaction(){
+
+  printf("TRANSAÇÃO COMMITADA!\n");
+
+}
+
+void rollback_transaction(){
+
+  printf("TRANSAÇÃO CANCELADA!\n");
+
+}

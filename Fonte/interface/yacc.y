@@ -49,12 +49,13 @@ int yywrap() {
         LIST_TABLES LIST_TABLE  CONNECT     HELP        LIST_DBASES
         CLEAR       CONTR       WHERE       OPERADOR    RELACIONAL
         LOGICO      ASTERISCO   SINAL       FECHA_P     ABRE_P
-        STRING      INDEX       ON;
+        STRING      INDEX       ON          TBEGIN       END
+        COMMIT      ROLLBACK;
 %%
 start: insert | select | create_table | create_database | drop_table | drop_database
      | table_attr | list_tables | connection | exit_program | semicolon {GLOBAL_PARSER.consoleFlag = 1; return 0;}
      | help_pls | list_databases | clear | contributors | create_index
-     | qualquer_coisa | /*epsilon*/;
+     | qualquer_coisa | /*epsilon*/ | begin_transaction;
 
 /*--------------------------------------------------*/
 /**************** GENERAL FUNCTIONS *****************/
@@ -213,12 +214,27 @@ sinal: '-' {adcTokenWhere(*yytext,3);} | '+' {adcTokenWhere(*yytext,3);}
 operando: sinal VALUE {adcTokenWhere(yylval.strval,9);} | sinal NUMBER {adcTokenWhere(yylval.strval,9);}
         | VALUE {adcTokenWhere(yylval.strval,9);} | NUMBER {adcTokenWhere(yylval.strval,9);}
 
-/* CREATE TABLE */
+/* CREATE TABLE INDEX*/
 create_index: CREATE INDEX ON {setMode(OP_CREATE_INDEX);} table parentesis_open atributo parentesis_close semicolon {
     return 0;
 };
 
 atributo: OBJECT {setColumnBtreeCreate(yytext);}
+
+
+/* GERENCIAMENTO DE TRANSAÇÕES*/
+begin_transaction: TBEGIN {begin_transaction();} transaction_commands transaction_actions;
+
+transaction_commands: /* epsilon */
+                    | select
+                    | create_table
+                    | qualquer_coisa
+                    | list_tables
+                    | clear
+
+transaction_actions: END {end_transaction();}
+                  | ROLLBACK {rollback_transaction();}   
+                  | COMMIT {commit_transaction();} transaction_commands transaction_actions;
 
 
 
