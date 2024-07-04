@@ -303,15 +303,15 @@ int interface() {
                             break;
                         case OP_CREATE_TABLE:
                             createTable(&GLOBAL_DATA);
-                            if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
+                            if(TRANSACTION ){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             break;
                         case OP_CREATE_DATABASE:
                             createDB(GLOBAL_DATA.objName);
                             if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             break;
                         case OP_DROP_TABLE:
-                            excluirTabela(GLOBAL_DATA.objName);
                             if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
+                            excluirTabela(GLOBAL_DATA.objName);
                             break;
                         case OP_DROP_DATABASE:
                             dropDatabase(GLOBAL_DATA.objName);
@@ -386,12 +386,16 @@ void yyerror(char *s, ...) {
 
 void begin_transaction(){
 
-  printf("TRANSAÇÃO INICIADA!\n");
+    if(TRANSACTION){
+        printf("Já existe uma transação em andamento!\n");
+        return;
+    }
+    printf("TRANSAÇÃO INICIADA!\n");
 
-  T_STACK = novaPilha();
+    T_STACK = novaPilha();
 
-  TRANSACTION = 1;
-  GLOBAL_PARSER.consoleFlag = 1;
+    TRANSACTION = 1;
+    GLOBAL_PARSER.consoleFlag = 1;
 
 }
 
@@ -415,7 +419,9 @@ void end_transaction(){
 void commit_transaction(int isEnd){
 
     if(TRANSACTION){
-        //Comitar transação
+        
+        commit_transaction_log(T_STACK);
+
         if(!isEnd){
             printf("TRANSAÇÃO COMMITADA!\n");
             GLOBAL_PARSER.consoleFlag = 1;
@@ -430,7 +436,9 @@ void commit_transaction(int isEnd){
 void rollback_transaction(){
 
     if(TRANSACTION){
-        //Rollback transação
+        
+        rollback(T_STACK);
+
         TRANSACTION = 0;
         printf("TRANSAÇÃO CANCELDA!\n");
         GLOBAL_PARSER.consoleFlag = 1;

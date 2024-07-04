@@ -1,10 +1,5 @@
 #define FTRANSACTION 1 // flag controlar os includes
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-
 #ifndef FMACROS // garante que macros.h não seja reincluída
    #include "macros.h"
 #endif
@@ -21,11 +16,12 @@
   #include "dictionary.h"
 #endif
 
+
 typedef struct t_action{
     int tipo;               //Tipo de ação
     rc_insert data;             //Informações
+    void *extra ;              //Informações extras
 }T_action;
-
 
 /*================================
 Descrição: Insere no log uma nova operação
@@ -41,6 +37,31 @@ Retorna: Resultado da operação
 ==================================*/
 int rollback(Pilha *log);
 
+/*================================
+Descrição: Commita a transação. Ou seja, limpa o log para que as operações
+           até aquele ponto não sejam desfeitas
+Recebe: Log
+Retorna: -
+==================================*/
+void commit_transaction_log(Pilha* log);
+
+/*================================
+Descrição: Função auxiliar para debug que lê as ações em log (consome o log);
+Recebe: Log
+Retorna: -
+==================================*/
 void read_print_log(Pilha* log);
 
+/*================================
+Descrição: Faz uma cópia da estrtura rc_insert. Utilizado para salvar corretamente as ações na pilha de log
+Recebe: rc_insert a ser copiada
+Retorna: Cópia da estrutura passada como parâmetro
+==================================*/
 rc_insert copy_rc_insert(rc_insert *i);
+
+/*================================
+Descrição: Recupera uma tabela excluida durante a transação
+Recebe: Nome da tabela
+Retorna: -
+==================================*/
+void restoreTable(char *tableName, table *t);

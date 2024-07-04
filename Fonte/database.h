@@ -16,6 +16,8 @@ void dbInit();
 /* dropDatabase: Recebe o nome de um banco de dados
  *               deleta o banco caso o banco exista
  *               e o usuário esteja conectado em outro banco
+ *               Função alterada para não apagar o banco completamente, mas salvar
+ *               uma cópia que possa ser recuperada pelo Rollback da transação.
  */
 void dropDatabase(char *);
 
@@ -28,3 +30,9 @@ void showDB();
  *            para fazer a validação dos comandos enviados pelo usuário.
  */
 int interface();
+
+/* interface: Recebe o nome de um banco e resataura o banco
+ *            
+ */
+void restoreDatabase(char *);
+

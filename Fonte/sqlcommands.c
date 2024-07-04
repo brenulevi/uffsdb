@@ -1055,6 +1055,12 @@ int excluirTabela(char *nomeTabela) {
     }
    	strcpy(directory, connected.db_directory);
     strcat(directory, str);
+
+    char command[LEN_DB_NAME_IO*2] = "cp ";
+    strcat(command, directory);
+    strcat(command, " data/log_temp/\0");
+
+    system(command);    //Copia o .dat da tabela para que ela possa ser recuperada por um rollback
     remove(directory);
     free(bufferpoll);
 
@@ -1203,5 +1209,4 @@ void createIndex(rc_insert *t) {
   adicionaBT(t->objName, t->columnName[0]);
   printf("CREATE INDEX\n");
 }
-
 ///////

@@ -99,7 +99,9 @@ void createDB(char *db_name) {
   strcat(create, aux_name_tolower);
   free(aux_name_tolower);
 
-	if(system(create) == -1) {			//verifica se foi possivel criar o diretorio
+  char* create2 = "mkdir data/log_temp";
+
+	if(system(create) == -1 || system(create2) == -1) {			//verifica se foi possivel criar o diretorio
 		printf("ERROR: It was not possible to create the database\n");
 	}
   else if(objcmp(db_name, "uffsdb") != 0) printf("CREATE DATABASE\n");
@@ -134,11 +136,16 @@ void dropDatabase(char *db_name){
     	fseek(DB, ((LEN_DB_NAME_IO*2+1)*i), SEEK_SET); 	// posiciona o cabecote sobre o byte de validade
     	fwrite(&valid ,sizeof(char), 1, DB);			// do banco e apaga ele
 
-    	char directory[LEN_DB_NAME_IO] = "rm data/";
+    	/*char directory[LEN_DB_NAME_IO] = "rm data/";
     	strcat(directory, vec_directory[i]);
-    	strcat(directory, " -R\0");
+    	strcat(directory, " -R\0");*/
 
-    	system(directory);
+      char save[LEN_DB_NAME_IO] = "mv data/";   
+      strcat(save, vec_name[i]);
+      strcat(save, " data/log_temp/\0");
+
+      system(save);
+    	//system(directory);
 
       fclose(DB);
       printf("DROP DATABASE\n");
@@ -193,4 +200,42 @@ void dbInit(char *db) {
     } else name=db;
 
 	createDB(name);
+}
+
+void restoreDatabase(char *db_name){
+	FILE *DB;
+	int i;
+	char vec_name[QTD_DB][LEN_DB_NAME_IO],
+        vec_directory[QTD_DB][LEN_DB_NAME_IO],valid;
+
+  if((DB = fopen("data/DB.dat","r+b")) == NULL) {
+    printf("ERROR: cannot open file\n");
+    return;
+  }
+
+  for(i=0; fgetc(DB) != EOF; i++) {
+    fseek(DB, -1, 1);
+
+    fread(&valid			,sizeof(char), 			 1, DB);
+    fread(vec_name[i]  		,sizeof(char), LEN_DB_NAME_IO, DB);
+    fread(vec_directory[i] 	,sizeof(char), LEN_DB_NAME_IO, DB);
+    if(!valid && objcmp(vec_name[i], db_name) == 0){
+    	valid = 1;
+    	fseek(DB, ((LEN_DB_NAME_IO*2+1)*i), SEEK_SET); 	// posiciona o cabecote sobre o byte de validade
+    	fwrite(&valid ,sizeof(char), 1, DB);			// do banco e restaura ele
+
+    	char directory[LEN_DB_NAME_IO] = "mv log_temp/";
+    	strcat(directory, vec_name[i]);
+    	strcat(directory, " data/\0");
+
+      //printf("%s\n", directory);
+    	system(directory);
+
+      fclose(DB);
+      //printf("RESTAURED DATABASE\n");
+      return;
+    }
+  }
+  fclose(DB);
+  printf("ERROR: database does not exist\n");
 }

@@ -36,6 +36,8 @@
   #include "dictionary.h"
 #endif
 
+
+
 void new_action(Pilha* log, rc_insert *data, int op){
 
    rc_insert newData = copy_rc_insert(data);
@@ -44,11 +46,79 @@ void new_action(Pilha* log, rc_insert *data, int op){
    novaAcao->tipo = op;
    novaAcao->data = newData;
 
+   if(op == OP_DROP_TABLE){   //Se for drop table é necessário salvar algumas informações extras para que a tabela possa ser inserida nos dicionários depois.
+
+      struct fs_objects *obj = malloc(sizeof(struct fs_objects));
+      tp_table **tbl = malloc(sizeof(tp_table));
+      tp_table *tabela = abreTabela(data->objName, obj, tbl);
+
+      table *t = malloc(sizeof(table));
+      strcpy(t->nome, data->objName);
+      t->esquema = tabela;
+
+      novaAcao->extra = t;
+
+   }
    push(log, novaAcao);
 
 }
 
+void commit_transaction_log(Pilha* log){
+
+   read_print_log(log);
+   log = novaPilha();
+
+}
+
+
 int rollback(Pilha *log){
+
+     while(log->tam>0){
+      
+      T_action *acao = pop(log);
+      rc_insert data = acao->data;
+
+      switch(acao->tipo){  
+
+         case OP_CREATE_DATABASE:
+
+            printf("Ação desfeita: OP_CREATE_DATABASE (%s)\n", data.objName);
+            dropDatabase(data.objName);
+            break;
+         
+         /*case OP_CREATE_INDEX:
+
+            printf("Ação : OP_CREATE_INDEX | Em %s\n", data.objName);
+            break;*/
+
+         case OP_CREATE_TABLE:
+
+            printf("Ação desfeita: OP_CREATE_TABLE (%s)\n", data.objName);
+            excluirTabela(data.objName);
+            break;
+
+         case OP_DROP_DATABASE:
+
+            printf("Ação desfeita: OP_DROP_DATABASE (%s)\n", data.objName);
+            restoreDatabase(data.objName);
+
+            break;
+
+         case OP_DROP_TABLE:
+
+            printf("Ação desfeita: OP_DROP_TABLE (%s)\n", data.objName);
+            restoreTable(data.objName, acao->extra);
+            break;
+
+         /*case OP_INSERT:
+
+            printf("Ação: OP_INSERT | Em %s\n", data.objName);
+            break;*/
+
+      }
+
+   }
+
    return 0;
 }
 
@@ -139,4 +209,20 @@ rc_insert copy_rc_insert(rc_insert* i){
    }
 
    return copy;
+}
+
+void restoreTable(char *tableName, table *t){
+
+   char* tablePath = malloc(strlen(tableName)+20);
+
+   strcpy(tablePath, "mv data/log_temp/");
+   strcat(tablePath, tableName);
+
+   strcat(tablePath, ".dat ");
+   strcat(tablePath, connected.db_directory);
+
+   //printf("%s\n", tablePath);
+   system(tablePath);
+
+   finalizaTabela(t);
 }
