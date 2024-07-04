@@ -384,3 +384,36 @@ Como é armazenado o índice B+:
 		valor(string alocada dinamicamente) + $ + endereço(int, offset da tupla no arquivo de dados) + #(delimitador de tupla) + ... + &(fim do indice denso) + número de tuplas na tabela
 
 	A construção da árvore b+ é feita através do método Bulking Load, ou seja, carregamento em massa.
+
+########## LEIA-ME PARTE 6 ##############################################################################################################
+
+=> 07 de Julho 2024 <=
+
+Universidade Federal da Fronteira Sul – UFFS
+Curso: Ciência da Computação
+Componente Curricular: Banco de Dados II
+Professor: Dr. Denio Duarte
+Alunos: Bernardo, Breno, Judah, Luiz Faccio
+
+Introdução
+	Trabalho desenvolvido para o componente curricular de Banco de Dados II, sua finalidade é implementar um gerenciador de transações que contemple as funcionalidades de BEGIN, END, COMMIT, ROLLBACK. Não implementa controle de coocorrência.
+	Para implementação dessas funcionalidade foi utilizado um log em memória no formato de pilha e um diretório auxiliar que armazena dados excluídos. A técnica utilizada é UNDO NO-REDO. As operações feitas em uma transação são salvas em um log e também são executadas no banco, desta forma, se a transação for finalizada nada acontece e se ela for cancelada (Rollback) as ações serão desfeitas.
+	A maioria das funções que implementam a lógica principal bem como as funções auxiliares foram implementadas no arquivo transactions.c. Além disso, algumas modificações foram feitas nos outros arquivos, principalmente os que tratavam de exclusões de objetos, isto foi necessário para que as informações ainda pudessem ser recuperadas caso necessário (rollback).
+
+Sobre a gramática:
+	Para implemnetar as funcionalidades foram necessárias pequenas alterações na gramática. Foram adiconados os tokens [BEGIN, END, COMMIT, ROLLBACK] e eles podem ser produzidos a partir da variável inicial, em qualquer ordem.
+
+Sobre alterações no parser:
+	Quanto ao parser foram feitas mudanças significativas:
+		- Adição de duas variáveis globais utilizadas em tempo de execução: TRANSACTION - Identifica se há uma transação em andamento ou não; T_STACK - Variável que aponta para a pilha que representa o log da transação em andamento.
+		- Quatro novas funções que são chamadas de acordo com o token inserido. 
+		- Na função interface(): junto com cada funcionalidade SQL foi adicionado um observador (new_action()) que é ativado quando uma transação está em curso e ele salva qual ação foi realizada e as informações que ela utilizou. Essa função adiciona um novo nodo na pilha do log, que representará a ação correspondente para que ela possa ser desfeita futuramente se necessário.
+
+Implementação do BEGIN:
+	begin_transaction() - Inicia uma transação criando uma nova pilha e a atribuindo à T_STACK e alterando a variável TRANSACTION para 1. A partir deste momento, qualquer operação SQL no banco irá ser armazenada no log.
+Implementação do COMMIT:
+	 commit_transaction() - Como a técnica escolhida apenas desfaz alteração, quando o commit é acionado nada acontece no banco. Esta função apenas limpa a pilha do log para que aquelas ações 'commitadas' não possam ser desfeitas.
+Implementação do ROLLBACK:
+	rollback_transaction() - Consome toda a pilha do log realizando a operação "oposta" à operação correspondente consumida. Como a pilha armazena as operações de forma inversa da ordem em que elas ocorrem, é facil garantir a consistência. Por exemplo, se um create table foi realizado, um drop table será chamado para anular a ação. Quando é necessário cancelar uma ação de exclusão (DROP) a função restaura exatamente o objeto excluido.
+Implementação do END:
+	end_transaction() [parser.c] - Finaliza a transação commitando as ações realizadas e zerando a variável TRANSACTION.
