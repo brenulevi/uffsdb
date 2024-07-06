@@ -16,10 +16,11 @@
   #include "dictionary.h"
 #endif
 
+enum TEndTypes{ ENDCOMMIT, ENDROLLBACK };
 
 typedef struct t_action{
     int tipo;               //Tipo de ação
-    rc_insert data;             //Informações
+    rc_insert* data;             //Informações
     void *extra ;              //Informações extras
 }T_action;
 
@@ -29,6 +30,14 @@ Recebe: Pilha do log, valores utilizados, tipo de operação
 Retorna: -
 ==================================*/
 void new_action(Pilha* log, rc_insert *insert, int op);
+
+/**
+ * @brief Execute transaction commit flow
+ * @author Breno Soares Alves, Bernardo Flores Dalla Rosa
+ * @date 06/07/2024
+ * @return Operation result
+ */
+int commit(Pilha* log);
 
 /*================================
 Descrição: Função chamada para executar as operações do log em rollback
@@ -57,7 +66,7 @@ Descrição: Faz uma cópia da estrtura rc_insert. Utilizado para salvar correta
 Recebe: rc_insert a ser copiada
 Retorna: Cópia da estrutura passada como parâmetro
 ==================================*/
-rc_insert copy_rc_insert(rc_insert *i);
+rc_insert* copy_rc_insert(rc_insert *i);
 
 /*================================
 Descrição: Recupera uma tabela excluida durante a transação

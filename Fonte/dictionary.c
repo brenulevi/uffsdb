@@ -76,9 +76,9 @@ int existeAtributo(char *nomeTabela, column *c){
     if(pagina != NULL){
         count = 0;
         for(x = 0; x < objeto.qtdCampos; x++){
-            if (!pagina[x].nomeCampo) continue;
+            if (strcmp(pagina[x].nomeCampo, "") == 0) continue;
             for(aux = c; aux != NULL; aux=aux->next) {
-                if (!aux->nomeCampo) continue;
+                if (strcmp(aux->nomeCampo, "") == 0) continue;
                 if(objcmp(pagina[x].nomeCampo, aux->nomeCampo) == 0)
                     count++;
             }

@@ -224,9 +224,9 @@ atributo: OBJECT {setColumnBtreeCreate(yytext);}
 
 /* GERENCIAMENTO DE TRANSAÇÕES*/
 transaction: TBEGIN {begin_transaction(); return 0;}
-            | END {end_transaction(); return 0;}
-            | ROLLBACK {rollback_transaction(); return 0;}   
-            | COMMIT {commit_transaction(0); return 0;}
+            | END {end_transaction(ENDCOMMIT); return 0;}
+            | ROLLBACK {end_transaction(ENDROLLBACK); return 0;}   
+            | COMMIT {end_transaction(ENDCOMMIT); return 0;}
 
 
 

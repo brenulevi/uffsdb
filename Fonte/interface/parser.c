@@ -288,8 +288,12 @@ int interface() {
                     switch(GLOBAL_PARSER.mode) {
                         case OP_INSERT:
                             if (GLOBAL_DATA.N > 0) {
+                                if(TRANSACTION)
+                                {
+                                    new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);
+                                    break;
+                                }
                                 insert(&GLOBAL_DATA);
-                                if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             }
                             else
                                 printf("WARNING: Nothing to be inserted. Command ignored.\n");
@@ -399,52 +403,30 @@ void begin_transaction(){
 
 }
 
-void end_transaction(){
+void end_transaction(enum TEndTypes endType){
 
     if(TRANSACTION){
-        commit_transaction(1);
         TRANSACTION = 0;
+        if(endType == ENDCOMMIT)
+        {
+            commit(T_STACK);
+            commit_transaction_log(T_STACK);
 
-        read_print_log(T_STACK);
-
-        printf("TRANSAÇÃO FINALIZADA!\n");
-        GLOBAL_PARSER.consoleFlag = 1;
-
-    }else{
-        printf("Nenhuma transação em andamento!\n");
-        GLOBAL_PARSER.consoleFlag = 1;
-    }
-}
-
-void commit_transaction(int isEnd){
-
-    if(TRANSACTION){
-        
-        commit_transaction_log(T_STACK);
-
-        if(!isEnd){
             printf("TRANSAÇÃO COMMITADA!\n");
             GLOBAL_PARSER.consoleFlag = 1;
         }
+        else if (endType == ENDROLLBACK)
+        {
+            rollback(T_STACK);
+
+            printf("TRANSAÇÃO CANCELADA!\n");
+            GLOBAL_PARSER.consoleFlag = 1;
+        }
+
+        read_print_log(T_STACK);
+
     }else{
         printf("Nenhuma transação em andamento!\n");
         GLOBAL_PARSER.consoleFlag = 1;
     }
-
-}
-
-void rollback_transaction(){
-
-    if(TRANSACTION){
-        
-        rollback(T_STACK);
-
-        TRANSACTION = 0;
-        printf("TRANSAÇÃO CANCELDA!\n");
-        GLOBAL_PARSER.consoleFlag = 1;
-    }else{
-        printf("Nenhuma transação em andamento!\n");
-        GLOBAL_PARSER.consoleFlag = 1;
-    }
-
 }

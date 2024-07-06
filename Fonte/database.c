@@ -99,9 +99,7 @@ void createDB(char *db_name) {
   strcat(create, aux_name_tolower);
   free(aux_name_tolower);
 
-  char* create2 = "mkdir data/log_temp";
-
-	if(system(create) == -1 || system(create2) == -1) {			//verifica se foi possivel criar o diretorio
+	if(system(create) == -1) {			//verifica se foi possivel criar o diretorio
 		printf("ERROR: It was not possible to create the database\n");
 	}
   else if(objcmp(db_name, "uffsdb") != 0) printf("CREATE DATABASE\n");
@@ -200,6 +198,10 @@ void dbInit(char *db) {
     } else name=db;
 
 	createDB(name);
+
+  // Create directory to store transaction movements (create, drop, etc)
+  if(!system("mkdir data/log_temp/"))
+    printf("Can't create log_temp directory");
 }
 
 void restoreDatabase(char *db_name){

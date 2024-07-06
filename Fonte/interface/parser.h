@@ -1,3 +1,7 @@
+#ifndef FTRANSACTION
+  #include "../transactions.h"
+#endif
+
 #define FPARSER 1
 ////
 /* FUNÇÕES AUXILIARES DO INTERPRETADOR DE COMANDOS (yacc + lex)
@@ -136,21 +140,7 @@ void begin_transaction();
 
 /*
   Retorna: void,
-  recebe: void,
-  Printa o comando end da trasnação.
+  recebe: Tipo de finalização,
+  Termina a transação sendo commit ou rollback
 */
-void end_transaction();
-
-/*
-  Retorna: void,
-  recebe: void,
-  Printa o comando commit da transação.
-*/
-void commit_transaction();
-
-/*
-  Retorna: void
-  recebe: void,
-  Printa o comando rollback da transação.
-*/
-void rollback_transaction();
+void end_transaction(enum TEndTypes type);
