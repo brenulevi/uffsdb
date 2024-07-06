@@ -46,6 +46,11 @@ help							return HELP;
 [\\][\?]						return HELP;
 (?i:CLEAR)						return CLEAR;
 
+(?i:BEGIN)						return TBEGIN;
+(?i:END)						return END;
+(?i:COMMIT)						return COMMIT;
+(?i:ROLLBACK)					return ROLLBACK;
+
 [,]								return *yytext;
 [;]								return *yytext;
 [-]								return *yytext;
@@ -91,4 +96,7 @@ help							return HELP;
 [\\][t]+[^ ^\n]*		{invalidCommand(yytext);};
 [\\][t]+[ ]*[\n]		{invalidCommand("\\t <enter>'. Expecting '\\t TABLENAME"); return 0;};
 [ \t]+							/* ignore whitespace */;
+
+. 						{yyerror(yytext);}
+
 %%

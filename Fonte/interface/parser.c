@@ -23,6 +23,9 @@
 #ifndef FPARSER
    #include "parser.h"
 #endif
+#ifndef FTRANSACTION
+   #include "../transactions.h"
+#endif
 
 /* Estrutura global que guarda as informações obtidas pelo yacc
  * na identificação dos tokens
@@ -33,6 +36,9 @@ rc_insert GLOBAL_DATA;
   Informações da operação select.
 */
 inf_select SELECT;
+
+int TRANSACTION = 0;
+Pilha* T_STACK;
 
 /* Estrutura auxiliar do reconhecedor.
  */
@@ -282,6 +288,11 @@ int interface() {
                     switch(GLOBAL_PARSER.mode) {
                         case OP_INSERT:
                             if (GLOBAL_DATA.N > 0) {
+                                if(TRANSACTION)
+                                {
+                                    new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);
+                                    break;
+                                }
                                 insert(&GLOBAL_DATA);
                             }
                             else
@@ -296,18 +307,23 @@ int interface() {
                             break;
                         case OP_CREATE_TABLE:
                             createTable(&GLOBAL_DATA);
+                            if(TRANSACTION ){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             break;
                         case OP_CREATE_DATABASE:
                             createDB(GLOBAL_DATA.objName);
+                            if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             break;
                         case OP_DROP_TABLE:
+                            if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             excluirTabela(GLOBAL_DATA.objName);
                             break;
                         case OP_DROP_DATABASE:
                             dropDatabase(GLOBAL_DATA.objName);
+                            if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             break;
                         case OP_CREATE_INDEX:
                             createIndex(&GLOBAL_DATA);
+                            if(TRANSACTION){new_action(T_STACK, &GLOBAL_DATA, GLOBAL_PARSER.mode);}
                             break;
                         default: break;
                     }
@@ -368,4 +384,49 @@ void yyerror(char *s, ...) {
   vfprintf(stderr, s, ap);
   fprintf(stderr, "\n");
   */
+}
+
+//GERENCIAMENTO DE TRANSAÇÕES
+
+void begin_transaction(){
+
+    if(TRANSACTION){
+        printf("Já existe uma transação em andamento!\n");
+        return;
+    }
+    printf("TRANSAÇÃO INICIADA!\n");
+
+    T_STACK = novaPilha();
+
+    TRANSACTION = 1;
+    GLOBAL_PARSER.consoleFlag = 1;
+
+}
+
+void end_transaction(enum TEndTypes endType){
+
+    if(TRANSACTION){
+        TRANSACTION = 0;
+        if(endType == ENDCOMMIT)
+        {
+            commit(T_STACK);
+            commit_transaction_log(T_STACK);
+
+            printf("TRANSAÇÃO COMMITADA!\n");
+            GLOBAL_PARSER.consoleFlag = 1;
+        }
+        else if (endType == ENDROLLBACK)
+        {
+            rollback(T_STACK);
+
+            printf("TRANSAÇÃO CANCELADA!\n");
+            GLOBAL_PARSER.consoleFlag = 1;
+        }
+
+        read_print_log(T_STACK);
+
+    }else{
+        printf("Nenhuma transação em andamento!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }
 }
