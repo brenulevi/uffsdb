@@ -226,7 +226,7 @@ atributo: OBJECT {setColumnBtreeCreate(yytext);}
 transaction: TBEGIN {begin_transaction(); return 0;}
             | END {end_transaction(ENDCOMMIT); return 0;}
             | ROLLBACK {end_transaction(ENDROLLBACK); return 0;}   
-            | COMMIT {end_transaction(ENDCOMMIT); return 0;}
+            | COMMIT {commit_transaction(); return 0;}
 
 
 

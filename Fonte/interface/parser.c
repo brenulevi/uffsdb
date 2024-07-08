@@ -425,6 +425,25 @@ void end_transaction(enum TEndTypes endType){
 
         read_print_log(T_STACK);
 
+        system("rm data/log_temp/*");
+
+    }else{
+        printf("Nenhuma transação em andamento!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }
+}
+
+void commit_transaction()
+{
+    if(TRANSACTION){
+        commit(T_STACK);
+        commit_transaction_log(T_STACK);
+
+        printf("TRANSAÇÃO COMMITADA!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+
+        read_print_log(T_STACK);
+
     }else{
         printf("Nenhuma transação em andamento!\n");
         GLOBAL_PARSER.consoleFlag = 1;
