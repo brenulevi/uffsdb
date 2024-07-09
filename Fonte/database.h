@@ -31,8 +31,5 @@ void showDB();
  */
 int interface();
 
-/* interface: Recebe o nome de um banco e resataura o banco
- *            
- */
-void restoreDatabase(char *);
+
 

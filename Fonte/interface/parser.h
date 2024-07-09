@@ -144,3 +144,11 @@ void begin_transaction();
   Termina a transação sendo commit ou rollback
 */
 void end_transaction(enum TEndTypes type);
+
+/**
+ * @brief Commits transaction
+ * @author Breno Alves, Bernardo Flores, Luiz Faccio, Judah Milhomem
+ * @return void
+ */
+
+void commit_transaction();

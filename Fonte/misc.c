@@ -221,9 +221,7 @@ double get_inteiro(char v[]) {
 }
 
 double convertD(char u[]) {
-    // ?
-    //return get_inteiro(u)+get_decimal(u);
-    return atof(u);
+    return get_inteiro(u)+get_decimal(u);
     //Soma inteiro com decimal.ss
 }
 ///
