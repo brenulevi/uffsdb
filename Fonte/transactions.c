@@ -101,7 +101,7 @@ int rollback(Pilha *log){
 
          case OP_CREATE_DATABASE:
 
-            printf("Ação desfeita: OP_CREATE_DATABASE (%s)\n", data.objName);
+            //printf("Ação desfeita: OP_CREATE_DATABASE (%s)\n", data.objName);
             dropDatabase(data.objName);
             break;
          
@@ -112,26 +112,26 @@ int rollback(Pilha *log){
 
          case OP_CREATE_TABLE:
 
-            printf("Ação desfeita: OP_CREATE_TABLE (%s)\n", data.objName);
+            //printf("Ação desfeita: OP_CREATE_TABLE (%s)\n", data.objName);
             excluirTabela(data.objName);
             break;
 
          case OP_DROP_DATABASE:
 
-            printf("Ação desfeita: OP_DROP_DATABASE (%s)\n", data.objName);
+            //printf("Ação desfeita: OP_DROP_DATABASE (%s)\n", data.objName);
             restoreDatabase(data.objName);
 
             break;
 
          case OP_DROP_TABLE:
 
-            printf("Ação desfeita: OP_DROP_TABLE (%s)\n", data.objName);
+            //printf("Ação desfeita: OP_DROP_TABLE (%s)\n", data.objName);
             restoreTable(data.objName, acao->extra);
             break;
 
          case OP_INSERT:
 
-            printf("Ação: OP_INSERT | Em %s\n", data.objName);
+            //printf("Ação: OP_INSERT | Em %s\n", data.objName);
             break;
 
       }
@@ -248,4 +248,42 @@ void restoreTable(char *tableName, table *t){
    system(tablePath);
 
    finalizaTabela(t);
+}
+
+void restoreDatabase(char *db_name){
+	FILE *DB;
+	int i;
+	char vec_name[QTD_DB][LEN_DB_NAME_IO],
+        vec_directory[QTD_DB][LEN_DB_NAME_IO],valid;
+
+  if((DB = fopen("data/DB.dat","r+b")) == NULL) {
+    printf("ERROR: cannot open file\n");
+    return;
+  }
+
+  for(i=0; fgetc(DB) != EOF; i++) {
+    fseek(DB, -1, 1);
+
+    fread(&valid			,sizeof(char), 			 1, DB);
+    fread(vec_name[i]  		,sizeof(char), LEN_DB_NAME_IO, DB);
+    fread(vec_directory[i] 	,sizeof(char), LEN_DB_NAME_IO, DB);
+    if(!valid && objcmp(vec_name[i], db_name) == 0){
+    	valid = 1;
+    	fseek(DB, ((LEN_DB_NAME_IO*2+1)*i), SEEK_SET); 	// posiciona o cabecote sobre o byte de validade
+    	fwrite(&valid ,sizeof(char), 1, DB);			// do banco e restaura ele
+
+    	char directory[LEN_DB_NAME_IO] = "mv log_temp/";
+    	strcat(directory, vec_name[i]);
+    	strcat(directory, " data/\0");
+
+      //printf("%s\n", directory);
+    	system(directory);
+
+      fclose(DB);
+      //printf("RESTAURED DATABASE\n");
+      return;
+    }
+  }
+  fclose(DB);
+  printf("ERROR: database does not exist\n");
 }

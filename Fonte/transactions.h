@@ -74,3 +74,10 @@ Recebe: Nome da tabela
 Retorna: -
 ==================================*/
 void restoreTable(char *tableName, table *t);
+
+/*================================
+Descrição: Recupera uma database excluida durante a transação
+Recebe: Nome da database
+Retorna: -
+==================================*/
+void restoreDatabase(char *);
