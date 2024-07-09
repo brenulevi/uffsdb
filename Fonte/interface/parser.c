@@ -391,9 +391,11 @@ void yyerror(char *s, ...) {
 void begin_transaction(){
 
     if(TRANSACTION){
+
         printf("Já existe uma transação em andamento!\n");
         return;
     }
+
     printf("TRANSAÇÃO INICIADA!\n");
 
     T_STACK = novaPilha();
@@ -406,13 +408,15 @@ void begin_transaction(){
 void end_transaction(enum TEndTypes endType){
 
     if(TRANSACTION){
+
         TRANSACTION = 0;
+
         if(endType == ENDCOMMIT)
         {
             commit(T_STACK);
             commit_transaction_log(T_STACK);
 
-            printf("TRANSAÇÃO COMMITADA!\n");
+            printf("TRANSAÇÃO FINALIZADA!\n");
             GLOBAL_PARSER.consoleFlag = 1;
         }
         else if (endType == ENDROLLBACK)
@@ -423,7 +427,24 @@ void end_transaction(enum TEndTypes endType){
             GLOBAL_PARSER.consoleFlag = 1;
         }
 
-        read_print_log(T_STACK);
+        if (!system("[ -f data/log_temp/* ]")){
+            system("rm data/log_temp/*");
+        }
+
+    }else{
+        printf("Nenhuma transação em andamento!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
+    }
+}
+
+void commit_transaction()
+{
+    if(TRANSACTION){
+        commit(T_STACK);
+        commit_transaction_log(T_STACK);
+
+        printf("TRANSAÇÃO COMMITADA!\n");
+        GLOBAL_PARSER.consoleFlag = 1;
 
     }else{
         printf("Nenhuma transação em andamento!\n");

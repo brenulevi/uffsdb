@@ -20,7 +20,7 @@ enum TEndTypes{ ENDCOMMIT, ENDROLLBACK };
 
 typedef struct t_action{
     int tipo;               //Tipo de ação
-    rc_insert* data;             //Informações
+    rc_insert data;             //Informações
     void *extra ;              //Informações extras
 }T_action;
 
@@ -66,7 +66,7 @@ Descrição: Faz uma cópia da estrtura rc_insert. Utilizado para salvar correta
 Recebe: rc_insert a ser copiada
 Retorna: Cópia da estrutura passada como parâmetro
 ==================================*/
-rc_insert* copy_rc_insert(rc_insert *i);
+rc_insert copy_rc_insert(rc_insert *i, int operation);
 
 /*================================
 Descrição: Recupera uma tabela excluida durante a transação
@@ -74,3 +74,10 @@ Recebe: Nome da tabela
 Retorna: -
 ==================================*/
 void restoreTable(char *tableName, table *t);
+
+/*================================
+Descrição: Recupera uma database excluida durante a transação
+Recebe: Nome da database
+Retorna: -
+==================================*/
+void restoreDatabase(char *);
